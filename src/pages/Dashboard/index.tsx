@@ -9,7 +9,8 @@ import {
   Settings as SettingsIcon,
   School as SchoolIcon,
   Menu as MenuIcon,
-  Badge as IdentityIcon
+  Badge as IdentityIcon,
+  Http as HttpIcon
 } from '@mui/icons-material'
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
 import {
@@ -34,6 +35,7 @@ import MyIdentity from './MyIdentity/index.js'
 // import Apps from './Apps/index.jsx'
 // import App from './App/Index.jsx'
 import Settings from './Settings/index'
+import WebBrowser from './WebBrowser/index'
 // import BasketAccess from './BasketAccess/index.jsx'
 // import CertificateAccess from './CertificateAccess/index.jsx'
 // import ProtocolAccess from './ProtocolAccess/index.jsx'
@@ -223,6 +225,20 @@ const Dashboard = () => {
             </ListItemButton>
 
             <ListItemButton
+              onClick={() => navigation.push('/dashboard/webbrowser')}
+              selected={
+                history.location.pathname === '/dashboard/webbrowser'
+              }
+            >
+              <ListItemIcon>
+                <HttpIcon />
+              </ListItemIcon>
+              <ListItemText>
+                WebBrowser
+              </ListItemText>
+            </ListItemButton>
+
+            <ListItemButton
               onClick={() => {
                 window.open('https://projectbabbage.com/docs', '_blank')
               }}
@@ -278,6 +294,10 @@ const Dashboard = () => {
           <Route
             path='/dashboard/trust'
             component={Trust}
+          />
+          <Route
+            path='/dashboard/webbrowser'
+            component={WebBrowser}
           />
           {/*
           <Route
