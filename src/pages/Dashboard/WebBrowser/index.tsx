@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+// import { invoke } from '@tauri-apps/api/core';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from './styles'; // Import your theme
 import AddressBar from './AddressBar';
@@ -9,6 +10,14 @@ const WebBrowser: React.FC = () => {
   // const [currentUrl, setCurrentUrl] = useState('https://coingeek.com');
   const [tabs, setTabs] = useState<string[]>(['https://coingeek.com']);
   const [activeTab, setActiveTab] = useState(0);
+
+//   const fetchCookies = async (url: string) => {
+//     try {
+//         await invoke("fetch_url", { url });
+//     } catch (error) {
+//         console.error("Error fetching cookies:", error);
+//     }
+// };
 
   const handleAddTab = () => {
     setTabs([...tabs, '']); // Add a new, empty tab

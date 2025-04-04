@@ -126,6 +126,95 @@ fn relinquish_focus(window: Window) {
     }
 }
 
+
+
+
+
+// /// Create WebView that looks like a normal browser so it will work on all sites
+// use tauri::{WindowBuilder, WebviewAttributes, WebviewUrl};
+
+// #[tauri::command]
+// fn create_webview(url: String, app_handle: tauri::AppHandle) -> Result<(), String> {
+//     let webview_attributes = WebviewAttributes::new(
+//         WebviewUrl::External(tauri::Url::parse(&url).map_err(|e| e.to_string())?)
+//     );
+
+//     WindowBuilder::new(
+//         &app_handle,
+//         "dynamic_webview", // Window label
+//     )
+//     .title("Dynamic WebView")
+//     .build()
+//     .map_err(|e| e.to_string())?;
+
+//     Ok(())
+// }
+
+/// Attempt to listen for and inspect HTTP responses
+// use reqwest::Client;
+
+// #[tauri::command]
+// async fn fetch_url(url: String) -> Result<(), String> {
+//     let client = Client::new();
+//     match client.get(&url).send().await {
+//         Ok(response) => {
+//             if let Some(cookies) = response.headers().get("Set-Cookie") {
+//                 println!("Cookies: {:?}", cookies);
+//             } else {
+//                 println!("No cookies found.");
+//             }
+//             Ok(())
+//         }
+//         Err(e) => Err(format!("Failed to fetch URL: {}", e)),
+//     }
+// }
+
+use reqwest::{Client, header::HeaderMap};
+use std::collections::HashMap;
+
+#[tauri::command]
+async fn fetch_url(url: String) -> Result<(), String> {
+    let client = Client::new();
+
+    // Send the HTTP request
+    match client.get(&url).send().await {
+        Ok(response) => {
+            let headers = response.headers();
+
+            // Extract the "Set-Cookie" header
+            if let Some(cookie_header) = headers.get("Set-Cookie") {
+                // Log or parse the cookies for manual control
+                println!("Cookies detected: {:?}", cookie_header);
+
+                // Example: Decide to allow or reject cookies manually
+                let allow_cookies = should_allow_cookies(cookie_header.to_str().unwrap());
+                if allow_cookies {
+                    println!("Cookies allowed: {:?}", cookie_header);
+                } else {
+                    println!("Cookies rejected.");
+                }
+            } else {
+                println!("No cookies found.");
+            }
+
+            Ok(())
+        }
+        Err(e) => Err(format!("Failed to fetch URL: {}", e)),
+    }
+}
+
+// Helper function to decide whether cookies should be allowed
+fn should_allow_cookies(cookie: &str) -> bool {
+    // Implement your logic to allow/reject specific cookies here
+    println!("Inspecting cookie: {}", cookie);
+
+    // Example: Allow cookies containing "session", reject others
+    cookie.contains("session")
+}
+
+
+
+
 fn main() {
     tauri::Builder::default()
         .setup(move |app| {
@@ -336,7 +425,9 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             is_focused,
             request_focus,
-            relinquish_focus
+            relinquish_focus,
+            // create_webview,
+            fetch_url
         ])
         .run(tauri::generate_context!())
         .expect("Error while running Tauri application");

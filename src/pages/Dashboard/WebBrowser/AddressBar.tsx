@@ -1,34 +1,5 @@
-// import React, { useState } from 'react';
-
-// interface AddressBarProps {
-//   navigateTo: (url: string) => void;
-// }
-
-// const AddressBar: React.FC<AddressBarProps> = ({ navigateTo }) => {
-//   const [url, setUrl] = useState('');
-
-//   const handleNavigate = () => {
-//     navigateTo(url.startsWith('http') ? url : `https://${url}`);
-//   };
-
-//   return (
-//     <div className="address-bar">
-//       <button onClick={() => window.history.back()}>←</button>
-//       <button onClick={() => window.history.forward()}>→</button>
-//       <input
-//         type="text"
-//         placeholder="Enter URL..."
-//         value={url}
-//         onChange={(e) => setUrl(e.target.value)}
-//       />
-//       <button onClick={handleNavigate}>Go</button>
-//     </div>
-//   );
-// };
-
-// export default AddressBar;
-
 import React, { useState } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { Box, TextField, Button, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -36,7 +7,32 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 const AddressBar: React.FC<{ navigateTo: (url: string) => void }> = ({ navigateTo }) => {
   const [url, setUrl] = useState('');
 
-  const handleNavigate = () => navigateTo(url.startsWith('http') ? url : `https://${url}`);
+  const handleNavigate = () => {
+    const fullUrl = url.startsWith("http") ? url : `https://${url}`;
+    fetchCookies(fullUrl); // Use full URL for fetching cookies
+    navigateTo(fullUrl);
+  };
+
+
+  // const handleNavigate = async () => {
+  //   const fullUrl = url.startsWith("http") ? url : `https://${url}`;
+  //   try {
+  //     await invoke("create_webview", { url: fullUrl });
+  //     console.log(`Opened WebView with URL: ${fullUrl}`);
+  //   } catch (error) {
+  //     console.error("Error creating WebView:", error);
+  //   }
+  // };
+
+
+
+  const fetchCookies = async (url: string) => {
+    try {
+        await invoke("fetch_url", { url });
+    } catch (error) {
+        console.error("Error fetching cookies:", error);
+    }
+  };
 
   return (
     <Box
@@ -60,11 +56,25 @@ const AddressBar: React.FC<{ navigateTo: (url: string) => void }> = ({ navigateT
         placeholder="Enter URL..."
         value={url}
         onChange={(e) => setUrl(e.target.value)}
+        onKeyPress={(e) => {
+          if (e.key === "Enter") {
+            fetchCookies(url); // Fetch cookies when the user presses Enter
+            handleNavigate();  // Navigate to the URL
+          }
+        }}
         sx={{ marginLeft: 1 }}
       />
-      <Button variant="contained" color="primary" onClick={handleNavigate}>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => {
+          fetchCookies(url);  // Fetch cookies when the "Go" button is clicked
+          handleNavigate();   // Navigate to the URL
+        }}
+      >
         Go
       </Button>
+
     </Box>
   );
 };
