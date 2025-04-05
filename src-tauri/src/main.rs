@@ -176,7 +176,7 @@ fn relinquish_focus(window: Window) {
 
 
 
-use reqwest::{Client, header::HeaderMap};
+use reqwest::{Client};
 use std::time::Duration;
 
 #[tauri::command]
