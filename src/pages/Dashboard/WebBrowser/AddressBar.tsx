@@ -3,6 +3,12 @@ import { invoke } from '@tauri-apps/api/core';
 import { Box, TextField, Button, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { CookieContract } from '../../../contracts/cookieContract';
+import cookieArtifacts from '../../../../artifacts/cookieContract.json'
+CookieContract.loadArtifact(cookieArtifacts)
+
+
+
 
 const AddressBar: React.FC<{ navigateTo: (url: string) => void }> = ({ navigateTo }) => {
   const [url, setUrl] = useState('');
@@ -12,19 +18,6 @@ const AddressBar: React.FC<{ navigateTo: (url: string) => void }> = ({ navigateT
     fetchCookies(fullUrl); // Use full URL for fetching cookies
     navigateTo(fullUrl);
   };
-
-
-  // const handleNavigate = async () => {
-  //   const fullUrl = url.startsWith("http") ? url : `https://${url}`;
-  //   try {
-  //     await invoke("create_webview", { url: fullUrl });
-  //     console.log(`Opened WebView with URL: ${fullUrl}`);
-  //   } catch (error) {
-  //     console.error("Error creating WebView:", error);
-  //   }
-  // };
-
-
 
   const fetchCookies = async (url: string) => {
     try {
