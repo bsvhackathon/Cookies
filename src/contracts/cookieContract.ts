@@ -20,15 +20,11 @@ export class CookieContract extends SmartContract {
     @prop(true)
     cookiePrice: bigint
 
-    @prop(true)
-    cookieName: ByteString
-
-    constructor(metaNetClientAddr: Addr, cookieName: ByteString, cookiePrice: bigint) {
+    constructor(metaNetClientAddr: Addr, cookiePrice: bigint) {
         super(...arguments)
         // this.init(...arguments)
 
         this.metaNetClientAddr = metaNetClientAddr
-        this.cookieName = cookieName
         this.cookiePrice = cookiePrice
     }
 

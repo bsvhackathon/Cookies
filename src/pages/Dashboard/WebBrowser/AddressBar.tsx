@@ -4,7 +4,10 @@ import { Box, TextField, Button, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { CookieContract } from '../../../contracts/cookieContract';
-import cookieArtifacts from '../../../../artifacts/cookieContract.json'
+import cookieArtifacts from '../../../../artifacts/cookieContract.json';
+import { WalletClient, Transaction } from '@bsv/sdk';
+import { Addr, toByteString } from 'scrypt-ts';
+
 CookieContract.loadArtifact(cookieArtifacts)
 
 
@@ -13,11 +16,53 @@ CookieContract.loadArtifact(cookieArtifacts)
 const AddressBar: React.FC<{ navigateTo: (url: string) => void }> = ({ navigateTo }) => {
   const [url, setUrl] = useState('');
 
-  const handleNavigate = () => {
+  const handleNavigate = async () => {
+    window.parent.postMessage({ type: "messageType", data: "Your data here" }, "*");
+
     const fullUrl = url.startsWith("http") ? url : `https://${url}`;
+
+    // Call getPublicKey and handle its result
+    const wallet = new WalletClient()
+    const pubKey = await wallet.getPublicKey({ identityKey: true });
+    console.log("Fetched Public Key:", pubKey);
+
+    // const metaNetAddress = PublicKey.fromString(pubKey.publicKey).toAddress()
+
+    const metaNetAddress = Addr(toByteString(pubKey.publicKey));
+    console.log("MetaNet Address:", metaNetAddress);
+
+    const cookie = new CookieContract(metaNetAddress, 300n);
+    console.log("CookieContract initialized:", cookie);
+
+    const lockingScript = cookie.lockingScript.toHex()
+
+    console.log("lockingScript: ", lockingScript)
+    const cookieEnvelope = await wallet.createAction({
+      description: 'Create a meter',
+      outputs: [
+        {
+          basket: 'cookie tokens',
+          lockingScript,
+          satoshis: 1,
+          outputDescription: 'Cookie output'
+        }
+      ],
+      options: { randomizeOutputs: false }
+    })
+
+    if (!cookieEnvelope.tx) {
+      throw new Error('Transaction is undefined')
+    }
+
+    const transaction = Transaction.fromAtomicBEEF(cookieEnvelope.tx)
+    const txid = transaction.id('hex')
+    console.log("Transaction ID: ", txid)
+
+    // Proceed with navigation and other operations
     fetchCookies(fullUrl); // Use full URL for fetching cookies
     navigateTo(fullUrl);
   };
+
 
   const fetchCookies = async (url: string) => {
     try {

@@ -56,9 +56,30 @@ root.render(
       requestFocus={requestFocus}
       relinquishFocus={relinquishFocus}
 
+
+
+      
+
       onWalletReady={async (wallet: WalletInterface) => {
         (window as any).externallyCallableWallet = wallet // for debugging / testing
         console.log('THE INTERFACE IS UP! WALLET:', wallet)
+
+        window.addEventListener("message", (event) => {
+          // Optionally, check the origin for security
+          if (event.origin !== "your-iframe-origin") {
+            console.warn("Untrusted origin:", event.origin);
+            return;
+          }
+
+          // Handle the message
+          const { type, data } = event.data;
+          if (type === "messageType") {
+            console.log("Received message from iframe:", data);
+          }
+        });
+
+
+
 
         // Listen for "http-request" events from the Rust backend.
         await listen('http-request', async (event) => {

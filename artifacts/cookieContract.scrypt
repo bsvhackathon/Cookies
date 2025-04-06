@@ -3,12 +3,10 @@ struct __scrypt_ts_Change {  int amount;  Ripemd160 address;}
 contract CookieContract {
   Ripemd160 metaNetClientAddr;
   @state int cookiePrice;
-  @state bytes cookieName;
   bytes __scrypt_ts_ctx_hashoutputs;
   __scrypt_ts_Change __scrypt_ts_change;
-  constructor(Ripemd160 metaNetClientAddr, bytes cookieName, int cookiePrice) {
+  constructor(Ripemd160 metaNetClientAddr, int cookiePrice) {
     this.metaNetClientAddr = metaNetClientAddr;
-    this.cookieName = cookieName;
     this.cookiePrice = cookiePrice;
   }
   public function cookieSale(Ripemd160 dest, SigHashPreimage __scrypt_ts_txPreimage, int __scrypt_ts_changeAmount, Ripemd160 __scrypt_ts_changeAddress) {

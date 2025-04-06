@@ -1,5 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
+
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -9,6 +11,11 @@ export default defineConfig(async () => ({
     react({
       // Ensure that all .jsx, .tsx, .js, and .ts files are included.
       include: "**/*.{jsx,tsx,js,ts}",
+    }),
+    nodePolyfills({
+      globals: {
+        process: true, // Enable polyfill for `process`
+      },
     }),
   ],
 
