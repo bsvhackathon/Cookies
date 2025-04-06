@@ -2,11 +2,14 @@ import { AdmittanceInstructions, TopicManager } from '@bsv/overlay'
 import { PublicKey, Signature, Transaction } from '@bsv/sdk'
 import pushdrop from 'pushdrop'
 import { getDocumentation } from '../utils/getDocumentation.js'
+import { CookieContract } from '../../contracts/cookieContract';
+import cookieArtifacts from '../../artifacts/cookieContract.json';
+CookieContract.loadArtifact(cookieArtifacts)
 
 /**
  *  Note: The PushDrop package is used to decode BRC-48 style Pay-to-Push-Drop tokens.
  */
-export class HelloWorldTopicManager implements TopicManager {
+export class CookieTopicManager implements TopicManager {
   /**
    * Identify if the outputs are admissible depending on the particular protocol requirements
    * @param beef - The transaction data in BEEF format
@@ -21,27 +24,12 @@ export class HelloWorldTopicManager implements TopicManager {
       // Try to decode and validate transaction outputs
       for (const [i, output] of parsedTransaction.outputs.entries()) {
         try {
-          const result = pushdrop.decode({
-            script: output.lockingScript.toHex(),
-            fieldFormat: 'buffer'
-          })
 
-          // Validate expected data according to the HelloWorld protocol
-          // 1. Must have 1 field
-          // 2. Must have a message greater than 2 characters
-          if (result.fields.length !== 1) continue
+          //Parse sCrypt locking script
+          const script = output.lockingScript.toHex()
+          const cookie = CookieContract.fromLockingScript(script)
+          console.log(cookie)
 
-          const helloWorldMessage = result.fields[0].toString('utf8')
-          if (helloWorldMessage.length < 2) continue
-
-          // Verify the signature
-          const pubKey = PublicKey.fromString(result.lockingPublicKey)
-          const hasValidSignature = pubKey.verify(
-            Array.from(Buffer.concat(result.fields)),
-            Signature.fromDER(result.signature, 'hex')
-          )
-
-          if (!hasValidSignature) throw new Error('Invalid signature!')
           outputsToAdmit.push(i)
         } catch (error) {
           console.error('Error processing output:', error)

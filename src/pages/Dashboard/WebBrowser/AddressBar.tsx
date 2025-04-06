@@ -3,11 +3,10 @@ import { invoke } from '@tauri-apps/api/core';
 import { Box, TextField, Button, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { CookieContract } from '../../../contracts/cookieContract';
-import cookieArtifacts from '../../../../artifacts/cookieContract.json';
 import { WalletClient, Transaction, SHIPBroadcasterConfig, SHIPBroadcaster } from '@bsv/sdk';
 import { Addr, toByteString } from 'scrypt-ts';
-
+import { CookieContract } from '../../../contracts/cookieContract';
+import cookieArtifacts from '../../../../artifacts/cookieContract.json';
 CookieContract.loadArtifact(cookieArtifacts)
 
 
@@ -70,7 +69,7 @@ const AddressBar: React.FC<{ navigateTo: (url: string) => void }> = ({ navigateT
       throw new Error('Transaction failed to broadcast')
     }
 
-    
+
   };
 
 

@@ -7,9 +7,9 @@ import { MongoClient } from 'mongodb'
 import https from 'https'
 import Knex from 'knex'
 import knexfile from '../knexfile.js'
-import { HelloWorldTopicManager } from './helloworld-services/HelloWorldTopicManager.js'
-import { HelloWorldLookupService } from './helloworld-services/HelloWorldLookupService.js'
-import { HelloWorldStorage } from './helloworld-services/HelloWorldStorage.js'
+// import { HelloWorldTopicManager } from './helloworld-services/HelloWorldTopicManager.js'
+// import { HelloWorldLookupService } from './helloworld-services/HelloWorldLookupService.js'
+// import { HelloWorldStorage } from './helloworld-services/HelloWorldStorage.js'
 import { SHIPLookupService } from './peer-discovery-services/SHIP/SHIPLookupService.js'
 import { SLAPLookupService } from './peer-discovery-services/SLAP/SLAPLookupService.js'
 import { SHIPStorage } from './peer-discovery-services/SHIP/SHIPStorage.js'
@@ -17,11 +17,14 @@ import { SLAPStorage } from './peer-discovery-services/SLAP/SLAPStorage.js'
 import { NinjaAdvertiser } from './peer-discovery-services/NinjaAdvertiser.js'
 import { SHIPTopicManager } from './peer-discovery-services/SHIP/SHIPTopicManager.js'
 import { SLAPTopicManager } from './peer-discovery-services/SLAP/SLAPTopicManager.js'
-import { UHRPStorage } from './data-integrity-services/UHRPStorage.js'
-import { UHRPTopicManager } from './data-integrity-services/UHRPTopicManager.js'
-import { UHRPLookupService } from './data-integrity-services/UHRPLookupService.js'
+import { CookieTopicManager } from './cookie-services/CookieTopicManager.js'
+// import { UHRPStorage } from './data-integrity-services/UHRPStorage.js'
+// import { UHRPTopicManager } from './data-integrity-services/UHRPTopicManager.js'
+// import { UHRPLookupService } from './data-integrity-services/UHRPLookupService.js'
 import { SyncConfiguration } from '@bsv/overlay/SyncConfiguration.ts'
 import CombinatorialChainTracker from './CombinatorialChainTracker.js'
+import * as crypto from 'crypto'
+(global.self as any) = { crypto }
 
 const knex = Knex(knexfile.development)
 const app = express()
@@ -35,7 +38,7 @@ const {
   DB_CONNECTION,
   NODE_ENV,
   HOSTING_DOMAIN,
-  TAAL_API_KEY,
+  // TAAL_API_KEY,
   SERVER_PRIVATE_KEY,
   DOJO_URL,
   MIGRATE_KEY
@@ -46,8 +49,8 @@ const knownDeployedOSN = `https://${NODE_ENV === 'production' ? '' : 'staging-'}
 const SLAP_TRACKERS = [knownDeployedOSN]
 const SHIP_TRACKERS = [knownDeployedOSN]
 const SYNC_CONFIGURATION: SyncConfiguration = {
-  tm_helloworld: [knownDeployedOSN],
-  tm_uhrp: false
+  // tm_helloworld: [knownDeployedOSN],
+  // tm_uhrp: false
 }
 
 // Initialization the overlay engine
@@ -67,18 +70,18 @@ const initialization = async () => {
     // - the default chaintracker for merkle proof validation
     console.log('Initializing Engine...')
     try {
-      // Configuration for ARC
-      const arcConfig: ArcConfig = {
-        deploymentId: '1',
-        apiKey: TAAL_API_KEY,
-        callbackUrl: `${HOSTING_DOMAIN as string}/arc-ingest`,
-        callbackToken: 'fredFlinstones',
-        httpClient: new NodejsHttpClient(https)
-      }
+      // // Configuration for ARC
+      // const arcConfig: ArcConfig = {
+      //   deploymentId: '1',
+      //   apiKey: TAAL_API_KEY,
+      //   callbackUrl: `${HOSTING_DOMAIN as string}/arc-ingest`,
+      //   callbackToken: 'fredFlinstones',
+      //   httpClient: new NodejsHttpClient(https)
+      // }
 
       // Create storage instances
-      const helloStorage = new HelloWorldStorage(db)
-      const uhrpStorage = new UHRPStorage(db)
+      // const helloStorage = new HelloWorldStorage(db)
+      // const uhrpStorage = new UHRPStorage(db)
       const shipStorage = new SHIPStorage(db)
       const slapStorage = new SLAPStorage(db)
 
@@ -90,14 +93,15 @@ const initialization = async () => {
 
       engine = new Engine(
         {
-          tm_helloworld: new HelloWorldTopicManager(),
-          tm_uhrp: new UHRPTopicManager(),
+          // tm_helloworld: new HelloWorldTopicManager(),
+          // tm_uhrp: new UHRPTopicManager(),
           tm_ship: new SHIPTopicManager(),
-          tm_slap: new SLAPTopicManager()
+          tm_slap: new SLAPTopicManager(),
+          tm_cookies: new CookieTopicManager(),
         },
         {
-          ls_helloworld: new HelloWorldLookupService(helloStorage),
-          ls_uhrp: new UHRPLookupService(uhrpStorage),
+          // ls_helloworld: new HelloWorldLookupService(helloStorage),
+          // ls_uhrp: new UHRPLookupService(uhrpStorage),
           ls_ship: new SHIPLookupService(shipStorage),
           ls_slap: new SLAPLookupService(slapStorage)
         },
@@ -112,7 +116,7 @@ const initialization = async () => {
         HOSTING_DOMAIN as string,
         SHIP_TRACKERS,
         SLAP_TRACKERS,
-        new ARC('https://arc.taal.com', arcConfig),
+        new ARC('https://arc.taal.com'),
         ninjaAdvertiser,
         SYNC_CONFIGURATION
       )
