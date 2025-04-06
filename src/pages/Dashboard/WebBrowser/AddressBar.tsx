@@ -5,7 +5,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { CookieContract } from '../../../contracts/cookieContract';
 import cookieArtifacts from '../../../../artifacts/cookieContract.json';
-import { WalletClient, Transaction } from '@bsv/sdk';
+import { WalletClient, Transaction, SHIPBroadcasterConfig, SHIPBroadcaster } from '@bsv/sdk';
 import { Addr, toByteString } from 'scrypt-ts';
 
 CookieContract.loadArtifact(cookieArtifacts)
@@ -20,6 +20,8 @@ const AddressBar: React.FC<{ navigateTo: (url: string) => void }> = ({ navigateT
     window.parent.postMessage({ type: "messageType", data: "Your data here" }, "*");
 
     const fullUrl = url.startsWith("http") ? url : `https://${url}`;
+    fetchCookies(fullUrl); // Use full URL for fetching cookies
+    navigateTo(fullUrl);
 
     // Call getPublicKey and handle its result
     const wallet = new WalletClient()
@@ -58,9 +60,17 @@ const AddressBar: React.FC<{ navigateTo: (url: string) => void }> = ({ navigateT
     const txid = transaction.id('hex')
     console.log("Transaction ID: ", txid)
 
-    // Proceed with navigation and other operations
-    fetchCookies(fullUrl); // Use full URL for fetching cookies
-    navigateTo(fullUrl);
+    const args: SHIPBroadcasterConfig = {
+      networkPreset: 'local'
+    }
+    const broadcaster = new SHIPBroadcaster(['tm_cookies'], args)
+    const broadcasterResult = await broadcaster.broadcast(transaction)
+    console.log('broadcasterResult:', broadcasterResult)
+    if (broadcasterResult.status === 'error') {
+      throw new Error('Transaction failed to broadcast')
+    }
+
+    
   };
 
 
